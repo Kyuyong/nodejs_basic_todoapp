@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 app.use(express.urlencoded({extended: true}));
 const bodyParser = require('body-parser');
+app.set('view engine', 'ejs');
 
 var db;
 const MongoClient = require('mongodb').MongoClient;
@@ -31,3 +32,6 @@ app.post('/add', function(요청, 응답){
 });
 
 // /list로 get요청을 접속하면 HTML을 보여줌
+app.get('/list', function(요청, 응답){
+  응답.render('list.ejs');
+});
