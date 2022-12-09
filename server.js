@@ -3,6 +3,8 @@ const app = express();
 app.use(express.urlencoded({extended: true}));
 const bodyParser = require('body-parser');
 app.set('view engine', 'ejs');
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'));
 
 
 app.use('/public', express.static('public'));
@@ -86,6 +88,22 @@ app.get('/detail/:id', function(요청, 응답){
 });
 
 
-app.get('/edit', function(요청, 응답){
-  응답.render('edit.ejs');
+app.get('/edit/:id', function(요청, 응답){
+
+  // edit/2 접속하면 2번 게시물 제목과 날짜를 edit.ejs로 보내줌
+  db.collection('post').findOne({_id: parseInt(요청.params.id)}, function(에러, 결과){
+    console.log(결과)
+    응답.render('edit.ejs',{post:결과});
+    
+  });
+
+});
+
+app.put('/edit', function(요청,응답){
+  // 폼에 담긴 제목, 날짜 데이터를 가지고 db.collection 업데이트함. 
+  db.collection('post').updateOne({_id: parseInt(요청.body.id) },{$set: {제목: 요청.body.title, 날짜: 요청.body.date}}, function(에러, 결과){
+    if(에러) return console.log(에러);
+    console.log('수정완료');
+    응답.redirect('/list');
+  });
 });
