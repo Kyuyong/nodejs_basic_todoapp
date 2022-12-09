@@ -107,3 +107,73 @@ app.put('/edit', function(요청,응답){
     응답.redirect('/list');
   });
 });
+
+
+// 회원 가입 가능을 만들기 위한 라이브러리 
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
+
+
+app.use(session({secret: '비밀코드', resave: true, saveUninitialized: false}));
+app.use(passport.initialize());  // 미들웨어
+app.use(passport.session());  // 미들웨어 
+
+app.get('/login', function(요청, 응답){
+  응답.render('login.ejs')
+});
+
+app.post('/login', passport.authenticate('local', {
+  failureRedirect: '/fail'
+}),  function(요청, 응답){
+  응답.redirect('/')
+});
+
+
+//로그인 했을때 마인페이지 넘어가기
+app.get('/mypage',로그인했니, function(요청, 응답){
+  console.log(요청.user);  //passport.deserializeUser 에서 가져온 정보
+  응답.render('mypage.ejs', {사용자: 요청.user})
+});
+//로그인 검증 함수
+function 로그인했니(요청, 응답, next){
+  if(요청.user){
+    next()
+  }else{
+    응답.send('로그인 안하셨는데요??')
+  }
+};
+
+//로그인 서버와 비교 인증과정 
+passport.use(new LocalStrategy({
+  usernameField: 'id',
+  passwordField: 'pw',
+  session: true,
+  passReqToCallback: false,
+}, function (입력한아이디, 입력한비번, done) {
+  //console.log(입력한아이디, 입력한비번);
+  db.collection('login').findOne({ id: 입력한아이디 }, function (에러, 결과) {
+    if (에러) return done(에러)
+
+    if (!결과) return done(null, false, { message: '존재하지않는 아이디요' })
+    if (입력한비번 == 결과.pw) {
+      return done(null, 결과)
+    } else {
+      return done(null, false, { message: '비번틀렸어요' })
+    }
+  })
+}));
+
+// id를 이용해서 세션을 저장시키는 코드 (로그인 성공시 발동))
+passport.serializeUser(function(user, done){
+  done(null, user.id)
+});
+
+// 마이페이지 접속시 발동 
+passport.deserializeUser(function(아이디, done){
+  // DB 에서 user.id로 user를 찾은 뒤에 유저 정보를 아래에 넣음
+  db.collection('login').findOne({id: 아이디}, function(에러, 결과){
+
+    done(null, 결과)
+  })
+});
