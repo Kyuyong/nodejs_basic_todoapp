@@ -8,24 +8,17 @@ app.use(methodOverride('_method'));
 
 
 app.use('/public', express.static('public'));
+require('dotenv').config();
 
 var db;
 const MongoClient = require('mongodb').MongoClient;
-MongoClient.connect('mongodb+srv://skons:qwer1234@cluster0.nioo7sz.mongodb.net/todoapp?retryWrites=true&w=majority', function(에러, client){
+MongoClient.connect(process.env.DB_URL, function(에러, client){
   if (에러) return console.log(에러);
   db = client.db('todoapp');
-  app.listen('8080', function(){
+  app.listen(process.env.PORT, function(){
     console.log('mongodb listening on 8080')
   });
 });
-
-// app.get('/',function(요청, 응답){
-//   응답.sendFile(__dirname + '/index.ejs')
-// });
-
-// app.get('/write',function(요청, 응답){
-//   응답.sendFile(__dirname + '/write.ejs')
-// });
 
 app.get('/', function(요청, 응답){
   응답.render('index.ejs')
