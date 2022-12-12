@@ -61,8 +61,22 @@ app.get('/list', function(요청, 응답){
 });
 
 app.get('/search', (요청,응답)=>{
-  console.log(요청.query.value);
-  db.collection('post').find({ $text : { $search: 요청.query.value }}).toArray(function(에러, 결과){
+  var 검색조건 = [
+    {
+      $search: {
+        index: 'titleSearch',
+        text: {
+          query: 요청.query.value,
+          path: '제목'  // 제목날짜 둘다 찾고 싶으면 ['제목', '날짜']
+        }
+      }
+    },
+    {$sort: {_id:1}}, // id순으로 정렬하고 싶을때,
+    // {$limit : 10 }, // 상위 몇개 자르고 싶을때
+    // {$project: {제목: 1, _id: 0, score: {$meta: "searchScore"}}} // 묶어서 검색하고 싶을때, searchScore 검색어 연광성 점수 보여줌 
+  ] 
+  
+  db.collection('post').aggregate(검색조건).toArray(function(에러, 결과){
     console.log(결과);
     응답.render('search.ejs', {posts: 결과});
   });
