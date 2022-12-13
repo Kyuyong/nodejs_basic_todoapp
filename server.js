@@ -231,3 +231,50 @@ app.use('/board/sub', require('./routes/board.js'));
 // app.get('/shop/pants', function(요청, 응답){
 //   응답.send('바지 파는 페이지입니다.');
 // });
+
+let multer = require('multer');
+var storage = multer.diskStorage({
+  destination : function(req, file, cb){
+    cb(null, './public/image')
+  },
+  filename : function(req, file, cb){
+    cb(null, file.originalname )
+    // 날짜를 붙히고 싶을땐, orginalname + new date()
+  }
+  
+});
+
+var path = require('path');
+var upload = multer({
+  storage : storage,
+  fileFilter: function (req, file, callback) {
+    var ext = path.extname(file.originalname);
+    if(ext !== '.png' && ext !== '.jpg' && ext !== '.jpeg') {
+        return callback(new Error('PNG, JPG만 업로드하세요'))
+    }
+    callback(null, true)
+  },
+  limits:{
+    fileSize: 1024 * 1024
+  }
+});
+
+app.get('/upload', function(요청, 응답){
+  응답.render('upload.ejs')
+});
+
+// 한개만 올리고 싶을땐
+app.post('/upload', upload.single("profile"), function(요청, 응답){
+  응답.send('업로드 완료');
+});
+
+// 여러개 파일을 올리고 싶을땐, 
+// app.post('/upload', upload.array("profile", 10), function(요청, 응답){
+//   응답.send('업로드 완료');
+// });
+
+
+app.get('/image/:imageName', function(요청,응답){
+  응답.sendFile( __dirname + '/public/image/' + 요청.params.imageName)
+});
+
