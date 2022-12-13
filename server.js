@@ -218,3 +218,16 @@ app.delete('/delete', function(요청, 응답){
   })
 
 });
+
+
+// 페이지가 많을때는 페이지들을 라우트로 따로 관리가 가능함
+app.use('/shop', require('./routes/shop.js'));
+app.use('/board/sub', require('./routes/board.js'));
+
+// app.get('/shop/shirts', function(요청, 응답){
+//   응답.send('셔츠 파는 페이지입니다.');
+// });
+
+// app.get('/shop/pants', function(요청, 응답){
+//   응답.send('바지 파는 페이지입니다.');
+// });
